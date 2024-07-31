@@ -5,7 +5,6 @@ import { fetchTransactionData } from './api';
 import { calculateRewardPoints } from './utils';
 import '@testing-library/jest-dom';
 
-// Mock the imported functions
 jest.mock('./api');
 jest.mock('./utils');
 
