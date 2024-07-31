@@ -7,7 +7,8 @@ const Modal = ({ isOpen, onClose, points }) => {
   return (
     <div className={`modal-overlay ${isOpen ? 'open' : ''}`}>
       <div className={`modal-content ${isOpen ? 'open' : ''}`}>
-        <h2>Reward Points</h2>
+        <h1>Thank You for choosing Us!!</h1>
+        <h2 className=''>Your Reward</h2>
         <p className='points'>{points} points</p>
         <button className='closeButton' onClick={onClose}>Close</button>
       </div>
