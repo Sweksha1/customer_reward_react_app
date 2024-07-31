@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Transactions from './Transaction';
-import { fetchTransactionData } from './api';
-import { calculateRewardPoints } from './utils';
+import Transactions from '../components/Transaction'; // Ensure this path is correct
+import { fetchTransactionData } from '../api'; // Ensure this path is correct
+import { calculateRewardPoints } from '../utils'; // Ensure this path is correct
 import '@testing-library/jest-dom';
 
-jest.mock('./api');
-jest.mock('./utils');
+jest.mock('../api'); // Ensure this path is correct
+jest.mock('../utils'); // Ensure this path is correct
 
 describe('Transactions Component', () => {
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe('Transactions Component', () => {
       '1': { total: 100, monthly: { '6': 100 } },
       '2': { total: 150, monthly: { '7': 150 } },
     };
-    
+
     fetchTransactionData.mockResolvedValue(mockData);
     calculateRewardPoints.mockImplementation(amount => amount / 2); // Example calculation
 

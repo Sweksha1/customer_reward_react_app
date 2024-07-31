@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { fetchTransactionData } from './api';
-import { calculateRewardPoints } from './utils';
+import { fetchTransactionData } from '../api';
+import { calculateRewardPoints } from '../utils';
 import Modal from './Modal';
-import './App.css'; 
+import '../styles/App.css'; 
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);

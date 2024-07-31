@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Home from './Home'; 
-import Transactions from './Transaction';
+import Home from './components/Home'; 
+import Transactions from './components/Transaction';
 
 const App = () => {
   useEffect(() => {
