@@ -1,73 +1,101 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Transactions from '../components/Transaction'; // Ensure this path is correct
-import { fetchTransactionData } from '../api'; // Ensure this path is correct
-import { calculateRewardPoints } from '../utils'; // Ensure this path is correct
 import '@testing-library/jest-dom';
+import Transactions from '../components/Transaction';
+import { fetchTransactionData } from '../api';
+import { calculateRewardPoints } from '../utils';
 
-jest.mock('../api'); // Ensure this path is correct
-jest.mock('../utils'); // Ensure this path is correct
+jest.mock('../api', () => ({
+  fetchTransactionData: jest.fn(),
+}));
+
+jest.mock('../utils', () => ({
+  calculateRewardPoints: jest.fn(),
+}));
+
+jest.mock('../components/Modal', () => ({ isOpen, onClose, points }) => (
+  isOpen ? (
+    <div>
+      <p>Points: {points}</p>
+      <button onClick={onClose}>Close</button>
+    </div>
+  ) : null
+));
 
 describe('Transactions Component', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
-  test('renders customer cards with correct data', async () => {
+  test('renders loading state initially', () => {
+    fetchTransactionData.mockResolvedValue([]);
+    render(<Transactions />);
+    expect(screen.getByText(/Loading.../i)).toBeInTheDocument();
+  });
+
+  test('renders error message if fetching fails', async () => {
+    fetchTransactionData.mockRejectedValue(new Error('Failed to fetch'));
+    render(<Transactions />);
+    await waitFor(() => {
+      expect(screen.getByText(/Failed to fetch transaction data. Please try again later./i)).toBeInTheDocument();
+    });
+  });
+
+  test('renders transaction data correctly', async () => {
     const mockData = [
-      { customerId: '1', amount: 200, date: '2024-06-15' },
-      { customerId: '2', amount: 300, date: '2024-07-10' },
+      { customerName: 'John Doe', amount: 100, date: '2024-01-15' },
+      { customerName: 'Jane Smith', amount: 50, date: '2024-01-20' },
     ];
-    const mockRewards = {
-      '1': { total: 100, monthly: { '6': 100 } },
-      '2': { total: 150, monthly: { '7': 150 } },
-    };
 
     fetchTransactionData.mockResolvedValue(mockData);
-    calculateRewardPoints.mockImplementation(amount => amount / 2); // Example calculation
+    calculateRewardPoints.mockImplementation(amount => amount * 1);
 
     render(<Transactions />);
     await waitFor(() => {
-      expect(screen.getByText('Customer 1')).toBeInTheDocument();
-      expect(screen.getByText('Customer 2')).toBeInTheDocument();
-      expect(screen.getByText('Month 6:')).toBeInTheDocument();
-      expect(screen.getByText('Month 7:')).toBeInTheDocument();
+      expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
+      expect(screen.getByText(/Jane Smith/i)).toBeInTheDocument();
+
+      const monthItems = screen.getAllByText(/Month 1:/i);
+      expect(monthItems.length).toBe(2); // Adjust based on the actual expected count
     });
   });
 
-  test('opens and closes modal correctly', async () => {
+  test('opens and closes modal with correct points', async () => {
     const mockData = [
-      { customerId: '1', amount: 200, date: '2024-06-15' },
+      { customerName: 'John Doe', amount: 100, date: '2024-01-15' },
     ];
-    const mockRewards = {
-      '1': { total: 100, monthly: { '6': 100 } },
-    };
 
     fetchTransactionData.mockResolvedValue(mockData);
-    calculateRewardPoints.mockImplementation(amount => amount / 2); // Example calculation
+    calculateRewardPoints.mockImplementation(amount => amount * 1);
 
     render(<Transactions />);
     await waitFor(() => {
-      expect(screen.getByText('Customer 1')).toBeInTheDocument();
-    });
+      const calculateButton = screen.getByText(/Calculate Reward Points/i);
+      expect(calculateButton).toBeInTheDocument();
+      
+      fireEvent.click(calculateButton);
+      expect(screen.getByText(/Points: 100/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Calculate Reward Points'));
-    expect(screen.getByText('Thank You for choosing Us!!')).toBeInTheDocument();
-    expect(screen.getByText('Your Reward')).toBeInTheDocument();
-    expect(screen.getByText('100 points')).toBeInTheDocument(); // Update to the correct expected value
-
-    fireEvent.click(screen.getByText('Close'));
-    await waitFor(() => {
-      expect(screen.queryByText('Thank You for choosing Us!!')).not.toBeInTheDocument();
+      const closeButton = screen.getByText(/Close/i);
+      fireEvent.click(closeButton);
+      expect(screen.queryByText(/Points: 100/i)).toBeNull();
     });
   });
 
-  test('displays error message if data fetching fails', async () => {
-    fetchTransactionData.mockRejectedValue(new Error('Network Error'));
+  test('disables calculate button if points are already calculated', async () => {
+    const mockData = [
+      { customerName: 'John Doe', amount: 100, date: '2024-01-15' },
+    ];
+
+    fetchTransactionData.mockResolvedValue(mockData);
+    calculateRewardPoints.mockImplementation(amount => amount * 1);
 
     render(<Transactions />);
     await waitFor(() => {
-      expect(screen.getByText('Failed to fetch transaction data. Please try again later.')).toBeInTheDocument();
+      const calculateButton = screen.getByText(/Calculate Reward Points/i);
+      fireEvent.click(calculateButton);
+
+      expect(calculateButton).toBeDisabled();
     });
   });
 });
