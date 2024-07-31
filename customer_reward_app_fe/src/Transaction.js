@@ -12,30 +12,34 @@ const Transactions = () => {
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedPoints, setSelectedPoints] = useState(0);
-  const [error, setError] = useState(null); // State for error handling
+  const [error, setError] = useState(null); 
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); 
       try {
         const data = await fetchTransactionData();
         setTransactions(data);
-
+  
         const rewardsByCustomer = data.reduce((acc, transaction) => {
           const { customerId, amount, date } = transaction;
           const month = new Date(date).getMonth() + 1;
           const points = calculateRewardPoints(amount);
+  
           if (!acc[customerId]) acc[customerId] = { total: 0, monthly: {} };
           acc[customerId].total += points;
           if (!acc[customerId].monthly[month]) acc[customerId].monthly[month] = 0;
           acc[customerId].monthly[month] += points;
+  
           return acc;
         }, {});
-
+  
         setRewards(rewardsByCustomer);
-
+  
         setCalculatedMonths(Object.keys(rewardsByCustomer).reduce((acc, customerId) => {
           acc[customerId] = Object.keys(rewardsByCustomer[customerId].monthly).reduce((monthlyAcc, month) => {
-            monthlyAcc[month] = false; // false means not calculated yet
+            monthlyAcc[month] = false;
             return monthlyAcc;
           }, {});
           return acc;
@@ -43,11 +47,15 @@ const Transactions = () => {
       } catch (err) {
         setError('Failed to fetch transaction data. Please try again later.');
         console.error('Error in fetchData:', err);
+      } finally {
+        setLoading(false); 
       }
     };
-
+  
     fetchData();
   }, []);
+  
+  
 
   const handleOpenModal = (customerId, month, points) => {
     setSelectedCustomerId(customerId);
@@ -55,53 +63,64 @@ const Transactions = () => {
     setSelectedPoints(points);
     setModalOpen(true);
   };
-
+  
   const handleCloseModal = () => {
     setModalOpen(false);
-    setCalculatedMonths(prev => ({
-      ...prev,
-      [selectedCustomerId]: {
-        ...prev[selectedCustomerId],
-        [selectedMonth]: true
-      }
-    }));
+    if (selectedCustomerId && selectedMonth) {
+      setCalculatedMonths(prev => ({
+        ...prev,
+        [selectedCustomerId]: {
+          ...prev[selectedCustomerId],
+          [selectedMonth]: true
+        }
+      }));
+    }
   };
+  
 
   return (
     <div className='transactions'>
       <h1>Transactions</h1>
-      {error && <p className='error'>{error}</p>}
-      <div className='cards-container'>
-        {Object.keys(rewards).map(customerId => (
-          <div className='card' key={customerId}>
-            <h2>Customer {customerId}</h2>
-            <div className='months'>
-              {Object.keys(rewards[customerId].monthly).map(month => (
-                <div className='month-item' key={month}>
-                  <p>Month {month}:</p>
-                  {calculatedMonths[customerId]?.[month] ? (
-                    <span className='monthlyPoints'>{rewards[customerId].monthly[month]} points</span>
-                  ) : (
-                    <button
-                      className='calculateRewardButton'
-                      onClick={() => handleOpenModal(customerId, month, rewards[customerId].monthly[month])}
-                      disabled={calculatedMonths[customerId]?.[month]}
-                    >
-                      Calculate Reward Points
-                    </button>
-                  )}
+      {loading ? (
+        <p className='loading'>Loading...</p> 
+      ) : (
+        <>
+          {error && <p className='error'>{error}</p>}
+          <div className='cards-container'>
+            {Object.keys(rewards).map(customerId => (
+              <div className='card' key={customerId}>
+                <h2>Customer {customerId}</h2>
+                <div className='months'>
+                  {Object.keys(rewards[customerId].monthly).map(month => (
+                    <div className='month-item' key={month}>
+                      <p>Month {month}:</p>
+                      {calculatedMonths[customerId]?.[month] ? (
+                        <span className='monthlyPoints'>{rewards[customerId].monthly[month]} points</span>
+                      ) : (
+                        <button
+                          className='calculateRewardButton'
+                          onClick={() => handleOpenModal(customerId, month, rewards[customerId].monthly[month])}
+                          disabled={calculatedMonths[customerId]?.[month]}
+                        >
+                          Calculate Reward Points
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            {Object.keys(calculatedMonths[customerId] || {}).every(month => calculatedMonths[customerId][month]) && (
-              <p className='totalPoints'>Total Points: {rewards[customerId].total}</p>
-            )}
+                {Object.keys(calculatedMonths[customerId] || {}).every(month => calculatedMonths[customerId][month]) && (
+                  <p className='totalPoints'>Total Points: {rewards[customerId].total}</p>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <Modal isOpen={modalOpen} onClose={handleCloseModal} points={selectedPoints} />
+          <Modal isOpen={modalOpen} onClose={handleCloseModal} points={selectedPoints} />
+        </>
+      )}
     </div>
   );
+  
+  
 };
 
 export default Transactions;
