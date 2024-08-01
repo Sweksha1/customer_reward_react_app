@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'; // Import necessary components from react-router-dom
-import Home from './components/Home'; 
-import Transactions from './components/Transaction'; 
+import { BrowserRouter as Router } from 'react-router-dom'; // Import necessary components from react-router-dom
+import DataHandler from './DataHandler';
 const App = () => {
   // useEffect hook to handle redirection if the URL path is '/transactions'
   useEffect(() => {
@@ -14,18 +13,8 @@ const App = () => {
   return (
     <Router> {/* Wrap the application in Router to enable routing */}
       <div className="App">
-        <nav>
-          <ul>
-            <li><Link to="/">Home</Link></li> {/* Link to the Home page */}
-            <li><Link to="/transactions">Transactions</Link></li> {/* Link to the Transactions page */}
-          </ul>
-        </nav>
-        
-        {/* Define routes for the application */}
-        <Routes>
-          <Route path="/" element={<Home />} /> 
-          <Route path="/transactions" element={<Transactions />} /> 
-        </Routes>
+        {/* Center component to handle business logic and hold other components  */}
+        <DataHandler />
       </div>
     </Router>
   );
