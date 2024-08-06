@@ -38,7 +38,7 @@ describe('Transactions Component', () => {
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
   
     const januaryElements = screen.getAllByText('Month January:');
-    expect(januaryElements.length).toBe(2); // One for each customer
+    expect(januaryElements.length).toBe(2); 
   
     expect(screen.getByText('120 points')).toBeInTheDocument();
     expect(screen.getByText('200 points')).toBeInTheDocument();
