@@ -34,27 +34,23 @@ describe('Transactions Component', () => {
   test('displays customer names and their points', () => {
     render(<Transactions rewards={rewards} loading={false} error={null} />);
     
-    // Check for customer names
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
   
-    // Check for monthly points
     const januaryElements = screen.getAllByText('Month January:');
     expect(januaryElements.length).toBe(2); // One for each customer
   
-    // Check for specific points
     expect(screen.getByText('120 points')).toBeInTheDocument();
     expect(screen.getByText('200 points')).toBeInTheDocument();
   
-    // Check for total points
     const totalPointsElements = screen.getAllByText('Total Points:');
-    expect(totalPointsElements.length).toBe(2); // One for each customer
+    expect(totalPointsElements.length).toBe(2); 
     totalPointsElements.forEach(element => {
       expect(element).toBeInTheDocument();
     });
   
-    expect(screen.getByText('370 points')).toBeInTheDocument(); // John Doe's total points
-    expect(screen.getByText('600 points')).toBeInTheDocument(); // Jane Smith's total points
+    expect(screen.getByText('370 points')).toBeInTheDocument(); 
+    expect(screen.getByText('600 points')).toBeInTheDocument(); 
   });
   
 });

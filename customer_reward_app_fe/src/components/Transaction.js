@@ -1,8 +1,6 @@
 import React from 'react';
 import '../styles/App.css';
-
 const Transactions = ({ rewards, loading, error }) => {
-
   // Helper function to calculate total points for a customer
   const calculateTotalPoints = (monthlyPoints) => {
     return Object.values(monthlyPoints).reduce((total, points) => total + points, 0);

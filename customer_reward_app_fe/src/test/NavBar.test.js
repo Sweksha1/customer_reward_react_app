@@ -10,7 +10,6 @@ describe('NavBar', () => {
         <NavBar />
       </MemoryRouter>
     );
-    // Check if the component renders without crashing
   });
 
   test('renders Home and Transactions links', () => {
@@ -19,9 +18,7 @@ describe('NavBar', () => {
         <NavBar />
       </MemoryRouter>
     );
-    // Check if the Home link is present
     expect(screen.getByText('Home')).toBeInTheDocument();
-    // Check if the Transactions link is present
     expect(screen.getByText('Transactions')).toBeInTheDocument();
   });
 
@@ -31,7 +28,6 @@ describe('NavBar', () => {
         <NavBar />
       </MemoryRouter>
     );
-    // Check if the Transactions link has the active class
     expect(screen.getByText('Transactions')).toHaveClass('active');
   });
 });

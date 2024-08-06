@@ -3,7 +3,7 @@ import NavBar from './components/NavBar'
 import { Route, Routes } from 'react-router-dom'
 import Home from './components/Home'
 import Transactions from './components/Transaction'
-import { fetchTransactionData } from './api.js'; // Import API function to fetch transaction data
+import { fetchTransactionData } from './api.js'; 
 import { calculateRewardPoints } from './utils.js';
 
 
@@ -17,7 +17,6 @@ const DataHandler = () => {
         try {
             const data = await fetchTransactionData(); // Fetch transaction data from API
             
-            // Array of month names
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     
             // Calculate rewards by customer and month
