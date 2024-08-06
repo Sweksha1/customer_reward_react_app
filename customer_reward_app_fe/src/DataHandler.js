@@ -17,23 +17,27 @@ const DataHandler = () => {
         try {
             const data = await fetchTransactionData(); // Fetch transaction data from API
             
+            // Array of month names
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
             // Calculate rewards by customer and month
             const rewardsByCustomer = data.reduce((acc, transaction) => {
                 const { customerName, amount, date } = transaction;
-                const month = new Date(date).getMonth() + 1;
+                const month = new Date(date).getMonth(); // Get month number (0-11)
                 const points = calculateRewardPoints(amount);
-
+    
                 // Initialize customer data if not already present
                 if (!acc[customerName]) acc[customerName] = { total: 0, monthly: {} };
                 acc[customerName].total += points;
-
+    
                 // Initialize monthly data if not already present
-                if (!acc[customerName].monthly[month]) acc[customerName].monthly[month] = 0;
-                acc[customerName].monthly[month] += points;
-
+                const monthName = monthNames[month]; // Get month name
+                if (!acc[customerName].monthly[monthName]) acc[customerName].monthly[monthName] = 0;
+                acc[customerName].monthly[monthName] += points;
+    
                 return acc;
             }, {});
-
+    
             setRewards(rewardsByCustomer);
         } catch (err) {
             setError('Failed to fetch transaction data. Please try again later.');
@@ -45,7 +49,9 @@ const DataHandler = () => {
     // useEffect hook to fetch transaction data when component mounts
     useEffect(() => {
         fetchData();
-    }, []); // Empty dependency array ensures this effect runs only once on component mount
+    }, []);
+     // Empty dependency array ensures this effect runs only once on component mount
+     
     return (
         <div>
             <NavBar />

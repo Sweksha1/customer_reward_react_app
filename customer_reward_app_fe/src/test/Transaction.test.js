@@ -1,101 +1,60 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Transactions from '../components/Transaction';
-import { fetchTransactionData } from '../api';
-import { calculateRewardPoints } from '../utils';
-
-jest.mock('../api', () => ({
-  fetchTransactionData: jest.fn(),
-}));
-
-jest.mock('../utils', () => ({
-  calculateRewardPoints: jest.fn(),
-}));
-
-jest.mock('../components/Modal', () => ({ isOpen, onClose, points }) => (
-  isOpen ? (
-    <div>
-      <p>Points: {points}</p>
-      <button onClick={onClose}>Close</button>
-    </div>
-  ) : null
-));
 
 describe('Transactions Component', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  const rewards = {
+    'John Doe': {
+      monthly: {
+        January: 120,
+        February: 150,
+        March: 100,
+      },
+    },
+    'Jane Smith': {
+      monthly: {
+        January: 200,
+        February: 180,
+        March: 220,
+      },
+    },
+  };
+
+  test('displays loading message when loading is true', () => {
+    render(<Transactions rewards={{}} loading={true} error={null} />);
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  test('renders loading state initially', () => {
-    fetchTransactionData.mockResolvedValue([]);
-    render(<Transactions />);
-    expect(screen.getByText(/Loading.../i)).toBeInTheDocument();
+  test('displays error message when error is present', () => {
+    render(<Transactions rewards={{}} loading={false} error="Error fetching data" />);
+    expect(screen.getByText('Error fetching data')).toBeInTheDocument();
   });
 
-  test('renders error message if fetching fails', async () => {
-    fetchTransactionData.mockRejectedValue(new Error('Failed to fetch'));
-    render(<Transactions />);
-    await waitFor(() => {
-      expect(screen.getByText(/Failed to fetch transaction data. Please try again later./i)).toBeInTheDocument();
+  test('displays customer names and their points', () => {
+    render(<Transactions rewards={rewards} loading={false} error={null} />);
+    
+    // Check for customer names
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+  
+    // Check for monthly points
+    const januaryElements = screen.getAllByText('Month January:');
+    expect(januaryElements.length).toBe(2); // One for each customer
+  
+    // Check for specific points
+    expect(screen.getByText('120 points')).toBeInTheDocument();
+    expect(screen.getByText('200 points')).toBeInTheDocument();
+  
+    // Check for total points
+    const totalPointsElements = screen.getAllByText('Total Points:');
+    expect(totalPointsElements.length).toBe(2); // One for each customer
+    totalPointsElements.forEach(element => {
+      expect(element).toBeInTheDocument();
     });
+  
+    expect(screen.getByText('370 points')).toBeInTheDocument(); // John Doe's total points
+    expect(screen.getByText('600 points')).toBeInTheDocument(); // Jane Smith's total points
   });
-
-  test('renders transaction data correctly', async () => {
-    const mockData = [
-      { customerName: 'John Doe', amount: 100, date: '2024-01-15' },
-      { customerName: 'Jane Smith', amount: 50, date: '2024-01-20' },
-    ];
-
-    fetchTransactionData.mockResolvedValue(mockData);
-    calculateRewardPoints.mockImplementation(amount => amount * 1);
-
-    render(<Transactions />);
-    await waitFor(() => {
-      expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
-      expect(screen.getByText(/Jane Smith/i)).toBeInTheDocument();
-
-      const monthItems = screen.getAllByText(/Month 1:/i);
-      expect(monthItems.length).toBe(2); // Adjust based on the actual expected count
-    });
-  });
-
-  test('opens and closes modal with correct points', async () => {
-    const mockData = [
-      { customerName: 'John Doe', amount: 100, date: '2024-01-15' },
-    ];
-
-    fetchTransactionData.mockResolvedValue(mockData);
-    calculateRewardPoints.mockImplementation(amount => amount * 1);
-
-    render(<Transactions />);
-    await waitFor(() => {
-      const calculateButton = screen.getByText(/Calculate Reward Points/i);
-      expect(calculateButton).toBeInTheDocument();
-      
-      fireEvent.click(calculateButton);
-      expect(screen.getByText(/Points: 100/i)).toBeInTheDocument();
-
-      const closeButton = screen.getByText(/Close/i);
-      fireEvent.click(closeButton);
-      expect(screen.queryByText(/Points: 100/i)).toBeNull();
-    });
-  });
-
-  test('disables calculate button if points are already calculated', async () => {
-    const mockData = [
-      { customerName: 'John Doe', amount: 100, date: '2024-01-15' },
-    ];
-
-    fetchTransactionData.mockResolvedValue(mockData);
-    calculateRewardPoints.mockImplementation(amount => amount * 1);
-
-    render(<Transactions />);
-    await waitFor(() => {
-      const calculateButton = screen.getByText(/Calculate Reward Points/i);
-      fireEvent.click(calculateButton);
-
-      expect(calculateButton).toBeDisabled();
-    });
-  });
+  
 });
