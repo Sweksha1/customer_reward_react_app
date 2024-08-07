@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import DataHandler from '../DataHandler';
 import { fetchTransactionData } from '../api';
@@ -24,8 +25,8 @@ describe('DataHandler Component', () => {
 
   test('renders Transactions component on /transactions route', async () => {
     const mockData = [
-      { customerName: 'John Doe', amount: 120, date: '2024-01-15' },
-      { customerName: 'Jane Smith', amount: 200, date: '2024-01-22' }
+      { customerName: 'Alice', amount: 120, date: '2024-01-15' },
+      { customerName: 'Fred', amount: 200, date: '2024-01-22' }
     ];
 
     fetchTransactionData.mockResolvedValue(mockData);
@@ -43,8 +44,8 @@ describe('DataHandler Component', () => {
 
     await waitFor(() => {
       expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
-      expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
-      expect(screen.getByText(/Jane Smith/i)).toBeInTheDocument();
+      expect(screen.getByText(/Alice/i)).toBeInTheDocument();
+      expect(screen.getByText(/Fred/i)).toBeInTheDocument();
     });
   });
 

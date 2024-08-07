@@ -5,14 +5,14 @@ import Transactions from '../components/Transaction';
 
 describe('Transactions Component', () => {
   const rewards = {
-    'John Doe': {
+    'Alice': {
       monthly: {
         January: 120,
         February: 150,
         March: 100,
       },
     },
-    'Jane Smith': {
+    'Fred': {
       monthly: {
         January: 200,
         February: 180,
@@ -34,8 +34,8 @@ describe('Transactions Component', () => {
   test('displays customer names and their points', () => {
     render(<Transactions rewards={rewards} loading={false} error={null} />);
     
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('Fred')).toBeInTheDocument();
   
     const januaryElements = screen.getAllByText('Month January:');
     expect(januaryElements.length).toBe(2); 
